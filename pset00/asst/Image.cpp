@@ -6,37 +6,56 @@ using namespace std;
 // There are a number of ways to implement this.
 // You can look at the size of image_data or use the extent function
 long long Image::number_of_elements()const {
-  return 0; // Change this
+  return image_data.size();
 }
 
 // Accessors and Setters
 const float & Image::operator()(int x) const {
   // return the pixel at location x, where x spans all locations and color channels
   // throw OutOfBoundsException if x is negative or larger than the number of elements
+  if (x < 0 || x >= number_of_elements()) {
+    throw OutOfBoundsException();
+  }
+  return image_data[x*channels()];
 }
 
 // Remember to do bounds checking
 const float & Image::operator()(int x, int y) const {
-  // Return x,y in the channel 0 and throw out of bounds if the input is invalid
+  if (x < 0 || x >= width() || y < 0 || y >= height()) {
+    throw OutOfBoundsException();
+  }
+  return image_data[y*channels() + x*channels()*height()];
 }
 
 const float & Image::operator()(int x, int y, int z) const {
   // Return the value in x,y,c and throw out of bounds if the input is invalid
+  if (x < 0 || x >= width() || y < 0 || y >= height() || z < 0 || z >= channels()) {
+    throw OutOfBoundsException();
+  }
+  return image_data[z + y*channels() + x*channels()*height()];
 }
 
 // The next three functions should have the same implementation as the previous three
 float & Image::operator()(int x) {
-
+  if (x < 0 || x >= number_of_elements()) {
+    throw OutOfBoundsException();
+  }
+  return image_data[x*channels()];
 }
 
 float & Image::operator()(int x, int y) {
-
+  if (x < 0 || x >= width() || y < 0 || y >= height()) {
+    throw OutOfBoundsException();
+  }
+  return image_data[y*channels() + x*channels()*height()];
 }
 
 float & Image::operator()(int x, int y, int z) {
-
+  if (x < 0 || x >= width() || y < 0 || y >= height() || z < 0 || z >= channels()) {
+    throw OutOfBoundsException();
+  }
+  return image_data[z + y*channels() + x*channels()*height()];
 }
-
 
 
 
