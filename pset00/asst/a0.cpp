@@ -26,6 +26,10 @@ Image brightness(const Image &im, const float &factor) {
   // Image output(im.width(), im.height(), im.channels());
   // Modify image brightness
   // return output;
+  if (factor < 0) {
+    throw OutOfBoundsException();
+  }
+
   Image brightened_image = Image(im.width(), im.height(), im.channels(), "brightened");
 
   for (int x = 0; x < im.width(); x++) {
@@ -46,6 +50,13 @@ Image contrast(const Image &im, const float &factor, const float &midpoint) {
   // Image output(im.width(), im.height(), im.channels());
   // Modify image contrast
   // return output;
+  if (factor < 0) {
+    throw OutOfBoundsException();
+  }
+  if (midpoint < 0 || midpoint > 1) {
+    throw OutOfBoundsException();
+  }
+
   Image contrasted_image = Image(im.width(), im.height(), im.channels(), "contrasted");
 
   for (int x = 0; x < im.width(); x++) {
