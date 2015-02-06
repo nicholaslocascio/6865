@@ -24,7 +24,7 @@ const float & Image::operator()(int x, int y) const {
   if (x < 0 || x >= width() || y < 0 || y >= height()) {
     throw OutOfBoundsException();
   }
-  return image_data[y*channels() + x*channels()*height()];
+  return image_data[x*channels() + y*channels()*width()];
 }
 
 const float & Image::operator()(int x, int y, int z) const {
@@ -32,7 +32,7 @@ const float & Image::operator()(int x, int y, int z) const {
   if (x < 0 || x >= width() || y < 0 || y >= height() || z < 0 || z >= channels()) {
     throw OutOfBoundsException();
   }
-  return image_data[z + y*channels() + x*channels()*height()];
+  return image_data[z + x*channels() + y*channels()*width()];
 }
 
 // The next three functions should have the same implementation as the previous three
@@ -47,14 +47,14 @@ float & Image::operator()(int x, int y) {
   if (x < 0 || x >= width() || y < 0 || y >= height()) {
     throw OutOfBoundsException();
   }
-  return image_data[y*channels() + x*channels()*height()];
+  return image_data[x*channels() + y*channels()*width()];
 }
 
 float & Image::operator()(int x, int y, int z) {
   if (x < 0 || x >= width() || y < 0 || y >= height() || z < 0 || z >= channels()) {
     throw OutOfBoundsException();
   }
-  return image_data[z + y*channels() + x*channels()*height()];
+  return image_data[z + x*channels() + y*channels()*width()];
 }
 
 
@@ -133,7 +133,7 @@ Image::Image(const std::string & filename) {
   for (unsigned int x= 0; x < width_; x++) {
     for (unsigned int y = 0; y < height_; y++) {
       for (unsigned int c = 0; c < outputchannels_; c++) {
-        image_data[x+y*width_+c*width_*height_] = uint8_to_float(uint8_image[c + y*channels_ + x*channels_*height_]);
+        image_data[x+y*width_+c*width_*height_] = uint8_to_float(uint8_image[c + x*channels_ + y*channels_*width_]);
       }
     }
   }
@@ -157,11 +157,11 @@ void Image::write(const std::string &filename) const {
   for (int x= 0; x < width(); x++) {
     for (int y = 0; y < height(); y++) {
       for (c = 0; c < channels(); c++) {
-	uint8_image[c + y*png_channels + x*png_channels*height()] = float_to_uint8(image_data[x+y*width()+c*width()*height()]);
+	uint8_image[c + x*png_channels + y*png_channels*width()] = float_to_uint8(image_data[x+y*width()+c*width()*height()]);
       }
       for ( ; c < 3; c++) { // Only executes when there is one channel
 
-	uint8_image[c + y*png_channels + x*png_channels*height()] = float_to_uint8(image_data[x+y*width()+0*width()*height()]);
+	uint8_image[c + x*png_channels + y*png_channels*width()] = float_to_uint8(image_data[x+y*width()+0*width()*height()]);
       }
     }
   }
