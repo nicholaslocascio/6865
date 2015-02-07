@@ -9,13 +9,15 @@ int main() {
   Image boston = readAnImage("Input/Boston_low_contrast.png");
   // my_im.write("test-read.png");
   Image im_2 =  Image(100, 100, 3, "test size");
+  
   cout << "size of data is " << im_2.number_of_elements() << endl;
   cout << "image data at 4 is " << boston(4) << endl;
   cout << "image data at 4,3 is " << boston(4,3) << endl;
   cout << "image data at 4,3,1 is " << boston(4,3,1) << endl;
+
   Image brightened_image = brightness(boston, 2.0);
-  brightened_image.write("test-brightened.png");
+  brightened_image.write("Output/brightened_image.png");
 
   Image contrasted_image = contrast(boston, 4.0, 0.5);
-  contrasted_image.write("contrasted_image.png");
+  contrasted_image.write("Output/contrasted_image.png");
 }
