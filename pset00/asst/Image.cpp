@@ -24,7 +24,7 @@ const float & Image::operator()(int x, int y) const {
   if (x < 0 || x >= width() || y < 0 || y >= height()) {
     throw OutOfBoundsException();
   }
-  return image_data[x*channels() + y*channels()*width()];
+  return image_data[y*width() + x];
 }
 
 const float & Image::operator()(int x, int y, int z) const {
@@ -32,7 +32,7 @@ const float & Image::operator()(int x, int y, int z) const {
   if (x < 0 || x >= width() || y < 0 || y >= height() || z < 0 || z >= channels()) {
     throw OutOfBoundsException();
   }
-  return image_data[z + x*channels() + y*channels()*width()];
+  return image_data[z*width()*height() + y*width() + x];
 }
 
 // The next three functions should have the same implementation as the previous three
@@ -47,14 +47,14 @@ float & Image::operator()(int x, int y) {
   if (x < 0 || x >= width() || y < 0 || y >= height()) {
     throw OutOfBoundsException();
   }
-  return image_data[x*channels() + y*channels()*width()];
+  return image_data[y*width() + x];
 }
 
 float & Image::operator()(int x, int y, int z) {
   if (x < 0 || x >= width() || y < 0 || y >= height() || z < 0 || z >= channels()) {
     throw OutOfBoundsException();
   }
-  return image_data[z + x*channels() + y*channels()*width()];
+  return image_data[z*width()*height() + y*width() + x];
 }
 
 
