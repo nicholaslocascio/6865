@@ -1,0 +1,1 @@
+6b) White balancing with the gray world assumption will not produce a good result on images that do not conform to the gray world assumption- for example an image of the blue ocean, a green forest, or a close-up of a red coca-cola label.
