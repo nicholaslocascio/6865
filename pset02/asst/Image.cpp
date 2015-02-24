@@ -6,7 +6,17 @@ using namespace std;
 //PS02 - 2.0.1: Safe Accessor that will return a black pixel (clamp = false) or the
 //nearest pixel value (clamp = true) when indexing out of the bounds of the image
 float Image::smartAccessor(int x, int y, int z, bool clamp) const{
-  return 0; // change this
+  int xx = max(0, min(x, width()-1));
+  int yy = max(0, min(y, height()-1));
+  if (xx!=x || yy!=y) {
+    if (clamp) {
+      return image_data[xx*stride_[0]+yy*stride_[1]+stride_[2]*z];
+    } else {
+      return 0;
+    }
+  } else {
+    return image_data[x*stride_[0]+y*stride_[1]+stride_[2]*z];
+  }
 }
 
 

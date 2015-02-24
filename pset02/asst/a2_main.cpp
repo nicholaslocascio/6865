@@ -135,8 +135,8 @@ int main() {
     // uncomment these test functions as you complete the assignment to test your code
     
     //testSmartAccessor();
-    //testScaling();
-    //testRotation();
+    testScaling();
+    testRotation();
     //testWarpBy1();
     //testMorph();
     
