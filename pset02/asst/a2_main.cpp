@@ -114,11 +114,11 @@ void testMorph(){
     
     
     // create an image morphing between fredo and werewolf at time t=0.5
-    vector<Image> imMorph = morph(fredo, werewolf, segsBefore, segsAfter);
+    vector<Image> imMorph = morph(fredo, werewolf, segsBefore, segsAfter, 8);
     
     // write out images
     char buffer [50];
-    for ( int n=0; n<3; n++){
+    for ( int n=0; n<8; n++){
         
         Image im = imMorph[n];
         sprintf (buffer, "./Output/fredo_werewolf_morph_%d.png", n);
@@ -134,11 +134,11 @@ int main() {
     
     // uncomment these test functions as you complete the assignment to test your code
     
-    //testSmartAccessor();
+    testSmartAccessor();
     testScaling();
     testRotation();
-    //testWarpBy1();
-    //testMorph();
+    testWarpBy1();
+    testMorph();
     
     
 }
