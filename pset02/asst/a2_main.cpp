@@ -118,13 +118,68 @@ void testMorph(){
     
     // write out images
     char buffer [50];
-    for ( int n=0; n<8; n++){
+    for ( int n=0; n<10; n++){
         
         Image im = imMorph[n];
         sprintf (buffer, "./Output/fredo_werewolf_morph_%d.png", n);
         
         im.write(buffer);
     }
+}
+
+void morphClass() {
+
+    // load the images
+    Image a("./Input/me.png");
+    Image b("./Input/you.png");
+    
+    // print out the size of the two images
+    printf("Image 1 is %dx%dx%d\n", a.width(), a.height(), a.channels());
+    printf("Image 2 is %dx%dx%d\n", b.width(), b.height(), b.channels());
+     
+vector<Segment> segsBefore;
+segsBefore.push_back(Segment(72, 126, 106, 126)); 
+segsBefore.push_back(Segment(75, 138, 104, 135)); 
+segsBefore.push_back(Segment(55, 86, 79, 85)); 
+segsBefore.push_back(Segment(96, 83, 122, 85)); 
+segsBefore.push_back(Segment(55, 144, 90, 163)); 
+segsBefore.push_back(Segment(102, 162, 126, 126)); 
+segsBefore.push_back(Segment(40, 96, 44, 120)); 
+segsBefore.push_back(Segment(137, 95, 132, 120)); 
+segsBefore.push_back(Segment(64, 32, 100, 30)); 
+segsBefore.push_back(Segment(107, 36, 128, 57)); 
+segsBefore.push_back(Segment(57, 39, 40, 66)); 
+segsBefore.push_back(Segment(143, 166, 182, 185)); 
+segsBefore.push_back(Segment(8, 188, 43, 174)); 
+
+vector<Segment> segsAfter;
+segsAfter.push_back(Segment(84, 126, 114, 124)); 
+segsAfter.push_back(Segment(86, 134, 113, 133)); 
+segsAfter.push_back(Segment(64, 73, 88, 74)); 
+segsAfter.push_back(Segment(103, 70, 130, 74)); 
+segsAfter.push_back(Segment(61, 135, 97, 157)); 
+segsAfter.push_back(Segment(114, 154, 142, 123)); 
+segsAfter.push_back(Segment(45, 93, 54, 123)); 
+segsAfter.push_back(Segment(148, 85, 149, 115)); 
+segsAfter.push_back(Segment(77, 19, 114, 19)); 
+segsAfter.push_back(Segment(123, 20, 145, 46)); 
+segsAfter.push_back(Segment(64, 25, 40, 60)); 
+segsAfter.push_back(Segment(148, 163, 186, 178)); 
+segsAfter.push_back(Segment(17, 185, 52, 169));
+    
+    
+    vector<Image> imMorph = morph(a, b, segsBefore, segsAfter, 15);
+    
+    // write out images
+    char buffer [50];
+    for ( int n=0; n<15; n++){
+        
+        Image im = imMorph[n];
+        sprintf (buffer, "./Output/class_morph_%d.png", n);
+        
+        im.write(buffer);
+    }
+
 }
 
 
@@ -134,11 +189,12 @@ int main() {
     
     // uncomment these test functions as you complete the assignment to test your code
     
-    testSmartAccessor();
-    testScaling();
-    testRotation();
-    testWarpBy1();
-    testMorph();
+    // testSmartAccessor();
+    // testScaling();
+    // testRotation();
+    // testWarpBy1();
+    //testMorph();
+    morphClass();
     
     
 }
