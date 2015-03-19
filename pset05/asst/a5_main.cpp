@@ -35,7 +35,6 @@ void testComputeFactor() {
 
     // compute the factor
     float factor = computeFactor(im1, w1, im2, w2);
-    cout << "factor: " << factor << endl;
 
 }
 
@@ -167,9 +166,9 @@ int main() {
     testMakeHDR();
     
     // tone map an hdr image
-    //testToneMapping_ante2();
-    //testToneMapping_ante3();
-    //testToneMapping_design();
-    //testToneMapping_boston();
+    testToneMapping_ante2();
+    testToneMapping_ante3();
+    testToneMapping_design();
+    testToneMapping_boston();
 
 }

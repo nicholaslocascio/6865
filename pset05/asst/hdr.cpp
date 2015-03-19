@@ -64,7 +64,7 @@ float computeFactor(const Image &im1, const Image &w1, const Image &im2, const I
   if (median==0) {
     cout << "very bad" << endl;
   }
-  cout << "med" << median << endl;
+
   return median;
 }
 
@@ -75,6 +75,10 @@ Image makeHDR(vector<Image> &imSeq, float epsilonMini, float epsilonMaxi){
   vector<Image> weightSeq;
   vector<float> factorSeq;
   factorSeq.push_back(1.0);
+
+  for (int i=0; i < ((int) imSeq.size()); i++) {
+    imSeq[i] = changeGamma(imSeq[i], 1.0/2.2, 1.0f);
+  }
 
   for (int i=0; i < ((int) imSeq.size()); i++) {
     Image im1 = imSeq[i];
@@ -91,29 +95,27 @@ Image makeHDR(vector<Image> &imSeq, float epsilonMini, float epsilonMaxi){
     weightSeq.push_back(weightImage);
   }
 
-
   for (int i=0; i < ((int) imSeq.size())-1; i++) {
     Image im1 = imSeq[i];
     Image im2 = imSeq[i+1];
     Image weightImage1 = weightSeq[i];
     Image weightImage2 = weightSeq[i+1];
     float factor = computeFactor(im1, weightImage1, im2, weightImage2);
-    factorSeq.push_back(factor);
+    if (i > 0) {
+      factorSeq.push_back(factor*factorSeq[i-1]);
+    }
   }
 
   for (int x = 0; x < output.width(); x++) {
     for (int y = 0; y < output.height(); y++) {
       for (int z = 0; z < output.channels(); z++) {
         float sumWeight = 0.0;
-        float kj = 1.0;
         float sumValue = 0.0;
           for (int i=0; i < ((int) imSeq.size())-1; i++) {
             float weight1 = weightSeq[i](x, y, z);
             float factor = factorSeq[i];
-            float ki = factor*kj;
-            kj = ki;
             sumWeight += weight1;
-            sumValue += (weight1/ki)*imSeq[i](x, y, z);
+            sumValue += (weight1/factor)*imSeq[i](x, y, z);
           }
           if(sumWeight == 0) {
             output(x, y, z) = imSeq[0](x,y,z);
@@ -144,23 +146,31 @@ Image toneMap(const Image &im, float targetBase, float detailAmp, bool useBila, 
 
     Image blurred = Image(im.width(), im.height(), im.channels());
     if (useBila) {
-      blurred = bilateral(logLumi, sigmaRange, sigmaDomain, truncate, false);
+      blurred = bilateral(logLumi, sigmaRange, sigmaDomain, truncate, true);
     } else {
-      blurred = gaussianBlur_seperable(logLumi, sigma, truncate, false);
+      blurred = gaussianBlur_seperable(logLumi, sigmaDomain, truncate, true);
     }
 
     float blurMaxVal = blurred.max();
-    float blurMinVal = image_minnonzero(blurred);
+    float blurMinVal = blurred.min();
     float k = log10(targetBase)/(blurMaxVal-blurMinVal);
 
     Image detailLog = logLumi - blurred;
     Image lumiOut = k*(blurred-blurMaxVal) + detailAmp*detailLog;
     Image lumiOutExp = exp10Image(lumiOut);
-    Image output = lumiChromi2rgb(lumiOutExp, chromi);
+
+    Image output = Image(im.width(), im.height(), 3);
+    for (int x = 0; x < output.width(); x++) {
+      for (int y = 0; y < output.height(); y++) {
+        for (int z = 0; z < output.channels(); z++) {
+          output(x, y, z) = chromi(x, y, z) * lumiOutExp(x, y);
+        }
+      }
+    }
 
     // add gamma correction back into the image right before returning
     output = changeGamma(output, 1.0f, 1/2.2);
-    return detailLog;
+    return output;
 }
 
 
@@ -206,7 +216,7 @@ Image exp10Image(const Image &im) {
 
 // min non-zero pixel value of image
 float image_minnonzero(const Image &im) {
-  float min = 1e15;
+  float min = 1.0;
 
   for (int x = 0; x < im.width(); x++) {
     for (int y = 0; y < im.height(); y++) {
