@@ -167,9 +167,9 @@ int main() {
     testMakeHDR();
     
     // tone map an hdr image
-    testToneMapping_ante2();
+    //testToneMapping_ante2();
     //testToneMapping_ante3();
-    testToneMapping_design();
+    //testToneMapping_design();
     //testToneMapping_boston();
 
 }

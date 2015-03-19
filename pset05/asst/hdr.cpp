@@ -65,7 +65,6 @@ float computeFactor(const Image &im1, const Image &w1, const Image &im2, const I
     cout << "very bad" << endl;
   }
   cout << "med" << median << endl;
-  cout << ratioVect.size() << endl;
   return median;
 }
 
@@ -75,6 +74,7 @@ Image makeHDR(vector<Image> &imSeq, float epsilonMini, float epsilonMaxi){
   Image output = Image(im1.width(), im1.height(), im1.channels());
   vector<Image> weightSeq;
   vector<float> factorSeq;
+  factorSeq.push_back(1.0);
 
   for (int i=0; i < ((int) imSeq.size()); i++) {
     Image im1 = imSeq[i];
@@ -91,6 +91,7 @@ Image makeHDR(vector<Image> &imSeq, float epsilonMini, float epsilonMaxi){
     weightSeq.push_back(weightImage);
   }
 
+
   for (int i=0; i < ((int) imSeq.size())-1; i++) {
     Image im1 = imSeq[i];
     Image im2 = imSeq[i+1];
@@ -103,22 +104,21 @@ Image makeHDR(vector<Image> &imSeq, float epsilonMini, float epsilonMaxi){
   for (int x = 0; x < output.width(); x++) {
     for (int y = 0; y < output.height(); y++) {
       for (int z = 0; z < output.channels(); z++) {
-        float sumWeight2 = 0.0;
+        float sumWeight = 0.0;
         float kj = 1.0;
         float sumValue = 0.0;
           for (int i=0; i < ((int) imSeq.size())-1; i++) {
             float weight1 = weightSeq[i](x, y, z);
-            float weight2 = weightSeq[i+1](x, y, z);
-            float factor = factorSeq[i+1];
+            float factor = factorSeq[i];
             float ki = factor*kj;
             kj = ki;
-            sumWeight2 += weight2;
-            sumValue += (weight2/ki)*imSeq[i+1](x, y, z);
+            sumWeight += weight1;
+            sumValue += (weight1/ki)*imSeq[i](x, y, z);
           }
-          if(sumWeight2 == 0 || sumWeight2 == (imSeq.size()-1)) {
+          if(sumWeight == 0) {
             output(x, y, z) = imSeq[0](x,y,z);
           } else {
-            output(x, y, z) = sumValue/sumWeight2;
+            output(x, y, z) = sumValue/sumWeight;
           }
       }
     }
