@@ -60,14 +60,14 @@ vector<Point> HarrisCorners(const Image &im, float k, float sigmaG, float factor
 
 // Pset07. Compute response = det(M) - k*[(trace(M)^2)]
 Image cornerResponse(const Image &im, float k, float sigmaG, float factorSigma) {
-  Image M = computeTensor(im, sigmaG, factorSigma);
+  Image M_matrix = computeTensor(im, sigmaG, factorSigma);
 
   Image R(im.width(), im.height(), 1);
   for (int x = 0; x < im.width(); x++) {
     for (int y = 0; y < im.height(); y++) {
-      float determinant = M(x, y, 0) * M(x, y, 2) - M(x, y, 1)*M(x, y, 1);
-      float trace = M(x, y, 0) + M(x, y, 2);
+      float trace = M_matrix(x, y, 0) + M_matrix(x, y, 2);
       float trace_squared = pow(trace, 2.0);
+      float determinant = M_matrix(x, y, 0) * M_matrix(x, y, 2) - M_matrix(x, y, 1)*M_matrix(x, y, 1);
       float response = determinant - k*trace_squared;
       R(x, y, 0) = response;
     }
@@ -82,7 +82,7 @@ Image descriptor(const Image &blurredIm, Point p, float radiusDescriptor) {
 
   Image output(out_width, out_height, 1);
 
-  int x_start = p.x  - radiusDescriptor;
+  int x_start = p.x - radiusDescriptor;
   int x_end = p.x + radiusDescriptor + 1;
   int y_start = p.y - radiusDescriptor;
   int y_end = p.y + radiusDescriptor + 1;
@@ -181,8 +181,6 @@ vector <Correspondance> findCorrespondences(vector<Feature> listFeatures1, vecto
 // return a vector of bools the same size as listOfCorrespondences indicating
 //  whether each correspondance is an inlier according to the homography H and threshold epsilon
 vector<bool> inliers(Matrix H, vector <Correspondance> listOfCorrespondences, float epsilon) {
-  float epsilon_squared = pow(epsilon, 2);
-
   vector<bool> ins;
   for (int i = 0; i < listOfCorrespondences.size(); i++) {
     float points[2][3];
@@ -190,29 +188,90 @@ vector<bool> inliers(Matrix H, vector <Correspondance> listOfCorrespondences, fl
 
     Matrix p1(1, 3, points[0]);
     Matrix p2(1, 3, points[1]);
-    p1 = homogenize(H.multiply(p1));
+
+    Matrix H_p1 = H.multiply(p1);
+    p1 = homogenize(H_p1);
 
     float dist_squared = pow(p1(0, 0) - p2(0, 0), 2.0) + pow(p1(0, 1) - p2(0, 1), 2.0);
     bool is_inlier = false;
+    float epsilon_squared = pow(epsilon, 2.0);
     if (dist_squared < epsilon_squared) {
       is_inlier = true;
     }
-    ins.push_back(is_inlier)
+    ins.push_back(is_inlier);
   }
-  return bools;
+
+  return ins;
 }
 
 Matrix RANSAC(vector <Correspondance> listOfCorrespondences, int Niter, float epsilon) {
   float listOfPairs[4][2][3]; // keep this at the top of your code.
 
-  // RANSAC loop. Note: this can take a while.
-      // getListOfPairs(corr, listOfPairs); // Call this line inside of your RANsac for loop
+  Matrix best_homography(1,1);
 
-  return Matrix(0, 0);
+  vector<bool> best_inliers;
+  int best_inlier_count = -1;
+
+  for (int i = 0; i < Niter; i++) {
+    vector<Correspondance> correspondences = sampleCorrespondances(listOfCorrespondences);
+    getListOfPairs(correspondences, listOfPairs);
+
+    Matrix H = computeHomography(listOfPairs);
+
+    vector<bool> ins = inliers(H, listOfCorrespondences, epsilon);
+
+    int inliers_count = countBoolVec(ins);
+    if (inliers_count > best_inlier_count) {
+      best_inlier_count = inliers_count;
+      best_homography = H;
+      best_inliers = ins;
+    }
+  }
+
+  return best_homography;
+}
+
+vector<float> bboxFromImage(Image &im) {
+  vector<float> bbox = vector<float>(4, 0);
+  bbox[0] = 0.0;
+  bbox[1] = im.width() - 1.0;
+  bbox[2] = 0.0;
+  bbox[3] = im.height() - 1.0;
+  return bbox;
 }
 
 Image autostitch(Image &im1, Image &im2, float blurDescriptor, float radiusDescriptor) {
-  return Image(0);
+  vector<Point> corners_1 = HarrisCorners(im1);
+  vector<Feature> feature_1 = computeFeatures(im1, corners_1);
+
+  vector<Point> corners_2 = HarrisCorners(im2);
+  vector<Feature> feature_2 = computeFeatures(im2, corners_2);
+
+  vector<Correspondance> correspondances = findCorrespondences(feature_1, feature_2);
+  Matrix H = RANSAC(correspondances, 100);
+
+  vector<float> bbox_1 = computeTransformedBBox(im1.width(), im1.height(), H);
+
+  vector<float> bbox_2 = bboxFromImage(im2);
+
+  vector<float> union_box = bboxUnion(bbox_1, bbox_2);
+
+  Matrix translated_bbox = translate(union_box);
+
+  float tx = translated_bbox(2, 0);
+  float ty = translated_bbox(2, 1);
+
+  int out_width = union_box[1] + tx;
+  int out_height = union_box[3] + ty;
+
+  Image output(out_width, out_height, im1.channels());
+
+  Matrix tb_H = translated_bbox.multiply(H);
+
+  applyhomography(im2, output, translated_bbox, true);
+  applyhomography(im1, output, tb_H, true);
+
+  return output;
 }
 
 /******************************************************************************
@@ -225,13 +284,17 @@ Image getBlurredLumi(const Image &im, float sigmaG) {
   Image lumi = lumi_Chrom_images[0];
   Image chromi = lumi_Chrom_images[1];
 
-  Image blurred = gaussianBlur_seperable(lumi, sigmaG);
-
-  return blurred;
+  return gaussianBlur_seperable(lumi, sigmaG);
 }
 
 int countBoolVec(vector<bool> ins) {
-  return 0;
+  int total = 0;
+  for (int i = 0; i < ins.size(); i++) {
+    if (ins[i] == true) {
+      total += 1;
+    }
+  }
+  return total;
 }
 
 /******************************************************************************

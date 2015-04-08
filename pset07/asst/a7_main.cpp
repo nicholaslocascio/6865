@@ -169,11 +169,11 @@ int main() {
   testDescriptor();
   testComputeFeatures();
   testFindCorrespondences();
-  //testRANSAC();
-  //testAutoStitch();
-  // testAutoStitchBoston();
+  testRANSAC();
+  testAutoStitch();
+  testAutoStitchBoston();
 
 
-  // testVisualizeCorrespondenceInliers();
+  testVisualizeCorrespondenceInliers();
   return 0;
 }

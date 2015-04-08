@@ -93,6 +93,8 @@ Image getBlurredLumi(const Image &im, float sigmaG);
 
 int countBoolVec(vector<bool> ins);
 
+vector<float> bboxFromImage(Image &im);
+
 /***********************************************************************
  * Helpful Functions, already implemented in Pset07 *
  ***********************************************************************/
