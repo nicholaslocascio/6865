@@ -354,19 +354,19 @@ Func Gaussian(Image<uint8_t> input, float sigma, float truncate) {
 
     GB(x, y) = cast<uint8_t>(clamp(blur_y(x, y), 0.0f, 255.0f));
 
-    Var x_outer("x_outer");
-    Var y_outer("y_outer");
-    Var x_inner("x_inner");
-    Var y_inner("y_inner");
-    Var tile_index("tile_index");
+    // Var x_outer("x_outer");
+    // Var y_outer("y_outer");
+    // Var x_inner("x_inner");
+    // Var y_inner("y_inner");
+    // Var tile_index("tile_index");
 
-    GB.tile(x, y, x_outer, y_outer, x_inner, y_inner, 2, 2)
-            .fuse(x_outer, y_outer, tile_index)
-            .parallel(tile_index);
+    // GB.tile(x, y, x_outer, y_outer, x_inner, y_inner, 2, 2)
+    //         .fuse(x_outer, y_outer, tile_index)
+    //         .parallel(tile_index);
 
     apply_auto_schedule(GB);
 
-    profile(GB, input.width(), input.height(), input.channels());
+    //profile(GB, input.width(), input.height(), input.channels());
 
     return GB;
 }
